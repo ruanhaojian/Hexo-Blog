@@ -40,6 +40,63 @@ rexxar自己设定了一套路由缓存机制，会通过请求回来的路由�
 
 我的解决方案：继承RexxarViewController，重写`_rxr_htmlURLWithUri`方法，使得每次都加载完整的网络地址。并且关闭缓存`[RXRConfig setCacheEnable:NO]`。
 
+```ObjectiveC
+- (NSURL *)_rxr_htmlURLWithUri:(NSURL *)uri htmlFileURL:(NSURL *)htmlFileURL
+{
+    // 当前网络url
+    NSURL *currentUrl = nil;
+    if (!htmlFileURL) {
+        // 没有设置 htmlFileURL，则使用本地 html 文件或者服务器读取 html 文件。
+        
+        htmlFileURL = [[RXRRouteManager sharedInstance] remoteHtmlURLForURI:self.uri];
+        currentUrl = [htmlFileURL copy];
+        
+        if ([RXRConfig isCacheEnable] && [htmlFileURL.path containsString: @".html"]) {
+            // 如果缓存启用，尝试读取本地文件。如果没有本地文件（本地文件包括缓存，和资源文件夹），则从服务器读取。
+            NSURL *localHtmlURL = [[RXRRouteManager sharedInstance] localHtmlURLForURI:self.uri];
+            if (localHtmlURL) {
+                htmlFileURL = localHtmlURL;
+            }
+        }
+        
+    }
+    
+    
+    if (htmlFileURL.query.length != 0 && htmlFileURL.fragment.length != 0) {
+        // 为了方便 escape 正确的 uri，做了下面的假设。之后放弃 iOS 7 后可以改用 `queryItem` 来实现。
+        // 做个合理假设：html URL 中不应该有 query string 和 fragment。
+        RXRWarnLog(@"local html 's format is not right! Url has query and fragment.");
+    }
+    
+    // `absoluteString` 返回的是已经 escape 过的文本，这里先转换为原始文本。
+    NSString *uriText = uri.absoluteString.stringByRemovingPercentEncoding;
+    // 把 uri 的原始文本所有内容全部 escape。
+    NSCharacterSet *set = [NSCharacterSet characterSetWithCharactersInString:@""];
+    uriText = [uriText stringByAddingPercentEncodingWithAllowedCharacters:set];
+    
+    NSURL *realLoadUrl = nil;
+    // 拼接完整url
+    if([htmlFileURL isFileURL]){
+        NSString *query = currentUrl.query ? [NSString stringWithFormat:@"?%@&uri=%@",currentUrl.query, uriText] : [NSString stringWithFormat:@"?uri=%@", uriText];
+        NSString *fragment = currentUrl.fragment ? [NSString stringWithFormat:@"#%@",currentUrl.fragment] : @"";
+        
+        realLoadUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@%@",htmlFileURL.absoluteString, query, fragment]];
+    }else{
+        NSString *scheme = htmlFileURL.scheme;
+        NSString *host = htmlFileURL.host;
+        NSString *port = htmlFileURL.port ? [NSString stringWithFormat:@":%@",htmlFileURL.port] : @"";
+        NSString *path = htmlFileURL.path ? htmlFileURL.path : @"/";
+        NSString *query = htmlFileURL.query ? [NSString stringWithFormat:@"?%@&uri=%@",htmlFileURL.query, uriText] : [NSString stringWithFormat:@"?uri=%@", uriText];
+        NSString *fragment = htmlFileURL.fragment ? [NSString stringWithFormat:@"#%@",htmlFileURL.fragment] : @"";
+        
+        realLoadUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@%@%@%@", scheme, host, port, path, query, fragment]];
+
+    }
+    
+    return  realLoadUrl;
+}
+```
+
 3、UIWebView自带缓存问题
 可通过路由链接加时间戳解决，获取修改rexxar的源码，动态拼接时间戳。
 
