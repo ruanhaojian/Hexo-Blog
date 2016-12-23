@@ -4,6 +4,8 @@ date: 2016-12-23 10:00:03
 tags: 
 	- vue-cli
 	- vue
+categories:
+  - vue
 ---
 
 # 前言

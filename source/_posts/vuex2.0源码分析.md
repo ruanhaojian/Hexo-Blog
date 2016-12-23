@@ -4,6 +4,8 @@ date: 2016-12-23 10:17:20
 tags: 
 	- vue
 	- vuex
+categories:
+  - vue
 ---
 
 当我们用 Vue.js 开发一个中到大型的单页应用时，经常会遇到如下问题：

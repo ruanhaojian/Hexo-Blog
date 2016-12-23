@@ -6,11 +6,24 @@ tags:
 	- hybrid
 categories:
 	- hybrid
+    - 原创
 ---
 
 > Rexxar 是一个针对移动端的混合开发框架。现在支持 Android 和 iOS 平台。rexxar-web 是 Rexxar 的 Web 端实现，提供配合 Rexxar Container 运行的基础工具。
 
 <!--more-->
+
+## 相关hybrid方案
+
+* 1.在JS 中做一次URL跳转，然后在OC中拦截跳转。（这里分为UIWebView 和 WKWebView两种，去年因为还要兼容iOS 6，所以没办法只能采用UIWebView来做。）
+* 2.利用WKWebView 的MessageHandler。
+* 3.利用系统库JavaScriptCore，来做相互调用。（iOS 7推出的）
+* 4.利用第三方库WebViewJavascriptBridge。JSBridge(Android: JsBridge，iOS：WebViewJavascriptBridge)。
+* 5.利用第三方cordova库，以前叫PhoneGap。（这是一个库平台的库）
+* 6.当下盛行的React Native。
+* 7.阿里推出的weex(使用了vue框架)，现已捐赠Apache。
+
+以下介绍的Rexxar使用的便是拦截的方案。
 
 ## Rexxar 简介
 
@@ -114,6 +127,7 @@ rexxar自己设定了一套路由缓存机制，会通过请求回来的路由�
 
 1、前端项目不限制使用何种技术框架
 所以你可以使用react、vue、angualr等等。按照常规web项目开发模式即可。
+
 
 ## 总结
 
