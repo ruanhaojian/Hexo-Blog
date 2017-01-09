@@ -1,5 +1,5 @@
 ---
-title: MobX文档
+title: 【译】MobX文档
 date: 2017-01-05 17:45:14
 tags: mobx
 ---
@@ -326,21 +326,234 @@ name.set("Dave");
 // prints: 'DAVE'
 ```
 
+## 2.4 Autorun
+
+`mobx.autorun` 可以用在那些你想创建一个响应函数，本身永远不会有观察者。这通常是当你需要从响应式桥到命令式代码时，例如对于日志记录(logging)，持久性(persistence)或UI更新代码。使用`mobx.autorun`，所提供的函数将在其某个依赖关系发生更改时就会触发。相比之下，`computed(function)`创建的函数只重新评估它是否有观察者本身，否则它的值被认为是不相关的。作为经验法则：如果您有一个应该自动运行但不会产生新值的函数，请使用`autorun`。其他情况使用`computed`。Autorun(自动运行)涉及启动效应，而不是产生新的价值。 如果字符串作为第一个参数传递给autorun，它将被用作调试名称。
+
+```javascript
+var numbers = observable([1,2,3]);
+var sum = computed(() => numbers.reduce((a, b) => a + b, 0));
+
+var disposer = autorun(() => console.log(sum.get()));
+// prints '6'
+numbers.push(4);
+// prints '10'
+
+disposer();
+numbers.push(5);
+// won't print anything, nor is `sum` re-evaluated
+```
+
+## 2.5 @observer
+
+`observer`方法或者说装饰器可以用来使ReactJS的组件变成响应式的组件。它将组件的render函数包装在`mobx.autorun`中，以确保在组件渲染期间使用的任何数据在更改时强制重新渲染。它通过单独的`mobx-react`包提供。
+
+```javascript
+import {observer} from "mobx-react";
+
+var timerData = observable({
+    secondsPassed: 0
+});
+
+setInterval(() => {
+    timerData.secondsPassed++;
+}, 1000);
+
+@observer class Timer extends React.Component {
+    render() {
+        return (<span>Seconds passed: { this.props.timerData.secondsPassed } </span> )
+    }
+});
+
+React.render(<Timer timerData={timerData} />, document.body);
+```
+提示：当`observer`需要与其他装饰器(decorators)或高阶组件(higher-order-components)组合时，请确保`observer`是最内层（首次应用的）装饰器; 否则它可能什么都不做。
+
+注意，使用`@observer`作为装饰器是可选的，`observer(class Timer ...{})`实现完全相同。
+
+**了解：解除引用组件中的值**
+
+MobX可以做很多，但它`不能使原始值可观察（虽然它可以将它们包装在一个对象中看到框的可观察值）。 所以不是可观察的值，而是对象的属性。 这意味着`@observer实际上反应了你取消引用一个值的事实。 所以在我们上面的例子中，如果Timer组件初始化如下：
+
+```javascript
+React.render(<Timer timerData={timerData.secondsPassed} />, document.body)
+```
+在这个片段中，只将当前值secondsPassed传递给Timer，它是不可变值0（所有原语在JS中都是不可变的）。这个数字在将来不会再改变，所以`Timer`永远不会更新。这是将来会改变的属性secondsPassed，所以我们需要在组件中访问它。 或者换句话说：值需要通过引用传递而不是值。
+
+**ES5 support**
+
+In ES5 environments, observer components can be simple declared using observer(React.createClass({ .... See also the [syntax guide](https://mobx.js.org/best/syntax.html)
+
+**Stateless function components（无状态函数组件）**
+
+上述定时器小部件也可以使用通过观察者传递的无状态函数组件编写：
+```javascript
+import {observer} from "mobx-react";
+
+const Timer = observer(({ timerData }) =>
+    <span>Seconds passed: { timerData.secondsPassed } </span>
+);
+```
+
+**Observable local component state**
+
+就像普通类一样，你可以使用`@observable`装饰器在组件上引入`@observable`。这意味着您可以在组件中具有本地状态，而不需要使用`React`的冗余和强制的`setState`机制来管理它，但是功能强大。反应状态将由`render`接收，但不会显式调用其他React生命周期方法，如`componentShouldUpdate`或`componentWillUpdate`。如果你需要那些，只需使用正常的基于React状态的API。
+
+上面的例子也可以写为：
+```javascript
+import {observer} from "mobx-react"
+import {observable} from "mobx"
+
+@observer class Timer extends React.Component {
+    @observable secondsPassed = 0
+
+    componentWillMount() {
+        setInterval(() => {
+            this.secondsPassed++
+        }, 1000)
+    }
+
+    render() {
+        return (<span>Seconds passed: { this.secondsPassed } </span> )
+    }
+})
+
+React.render(<Timer />, document.body)
+```
+有关使用observable本地组件状态的更多优点，请参见[3 reasons why I stopped using setState](https://medium.com/@mweststrate/3-reasons-why-i-stopped-using-react-setstate-ab73fc67a42e)。
+
+**Connect `observer` to stores**
+
+`mobx-react`包还提供了`Provider`组件，可以用于使用React的上下文机制传递存储。 要连接到这些stores，请将stores名称数组传递给observer，这将使stores像props一样使用。使用装饰器(`@observer("store")`) class ... 或者使用方法`observer(["store"], React.createClass({...}))`支持以上使用。
+例子：
+```javascript
+const colors = observable({
+   foreground: '#000',
+   background: '#fff'
+});
+
+const App = () =>
+  <Provider colors={colors}>
+     <app stuff... />
+  </Provider>;
+
+const Button = observer(["colors"], ({ colors, label, onClick }) =>
+  <button style={{
+      color: colors.foreground,
+      backgroundColor: colors.background
+    }}
+    onClick={onClick}
+  >{label}<button>
+);
+
+// later..
+colors.foreground = 'blue';
+// all buttons updated
+```
+
+See for more information the [mobx-react docs](https://github.com/mobxjs/mobx-react#provider-experimental).
+
+**什么时候该使用`observer`**
+
+简单的经验法则是：渲染可观察数据的所有组件。 如果不想将组件标记为观察器，例如为了减少通用组件包的依赖性，请确保只传递纯数据。
+使用@observer，不需要为了渲染的目的将'智能'组件与'哑'组件区分开。 它仍然是一个很好的分离，在哪里处理事件，请求等。所有组件变得负责更新时，他们自己的依赖关系改变。 它的开销是可以忽略的，它确保每当你开始使用可观察的数据，组件将响应它。 有关更多详细信息，请参阅此[线程](https://www.reddit.com/r/reactjs/comments/4vnxg5/free_eggheadio_course_learn_mobx_react_in_30/d61oh0l)。
+
+**`observer` and `PureRenderMixin`**
+
+`observer`也防止了当组件的道具仅仅浅地改变时的重新渲染，这使得传递到组件中的数据是反应性的，这是很有意义的。 此行为类似于[React PureRender mixin](https://facebook.github.io/react/docs/pure-render-mixin.html)，但状态更改始终处理。 如果组件提供自己的shouldComponentUpdate，那么它优先。 看到解释这个[github问题](https://github.com/mobxjs/mobx/issues/101)。
+
+**`componentWillReact` (生命周期钩子)**
+
+React组件通常在新堆栈上呈现，因此通常很难找出导致组件重新渲染的原因。 当使用mobx-react时，你可以定义一个新的生命周期钩子，`componentWillReact`（双关意图），当一个组件被调度重新渲染时，它将被触发，因为它观察到的数据已经改变。 这使得它很容易跟踪渲染回到导致渲染的操作。
+
+```javascript
+import {observer} from "mobx-react";
+
+@observer class TodoView extends React.Component {
+    componentWillReact() {
+        console.log("I will re-render, since the todo has changed!");
+    }
+
+    render() {
+        return <div>this.props.todo.title</div>;
+    }
+}
+```
+* `componentWillReact` 不带参数
+* `componentWillReact` 在初始渲染之前不会触发（使用`componentWillMount`代替）
+* `componentWillReact` 在接收到新的props或者在`setState`方法执行之后不会触发（使用`componentWillUpdate`代替）
+
+**优化组件**
+
+请参阅[相关部分](https://mobx.js.org/best/react-performance.html)。
+
+**MobX-React-DevTools**
+
+结合使用@observer，您可以使用MobX-React-DevTools，它显示组件何时被重新渲染，您可以检查组件的数据依赖关系。 请参阅[DevTools](https://mobx.js.org/best/devtools.html)部分。
 
 
+**observer components 的特性**
 
+* Observer仅订阅在上次渲染期间主动使用的数据结构。 这意味着您不能低于订阅或超量订阅。 您甚至可以在渲染中使用仅在稍后时间可用的数据。 这是异步加载数据的理想选择。
+* 您不需要声明组件将使用什么数据。 相反，依赖性在运行时确定并以非常细粒度的方式跟踪。
+* 通常反应性组件没有或很少有状态，因为在与其他组件共享的对象中封装（查看）状态通常更方便。 但你仍然可以自由使用状态。
+* `@observer`以与`PureRenderMixin`相同的方式实现`shouldComponentUpdate`，这样children不会有没必要的重新渲染。
+* Reactive components sideways load data; parent components won't re-render unnecessarily even when child components will.
+* `@observer` 不依赖 `React` 的上下文系统.
 
+## 2.6 action
 
+使用
+* `action(fn)`
+* `action(name, fn)`
+* `@action classMethod`
+* `@action(name) classMethod`
+* `@action boundClassMethod = (args) => { body }`
+* `@action(name) boundClassMethod = (args) => { body }`
 
+任何应用都有Actions。Actions是修改状态的地方。使用MobX，您可以通过标记它们在您的代码中显式地显示您的actions。Actions帮助你更好的组织代码。建议将它们用于修改observables或具有副作用的任何函数。action还提供了与devtools组合使用的有用的调试信息。Using the `@action` decorator with [ES 5.1 setters](http://www.ecma-international.org/ecma-262/5.1/#sec-11.1.5) (i.e. @action set propertyName) is not supported, however setters of [computed properties are automatically actions](https://github.com/mobxjs/mobx/blob/gh-pages/docs/refguide/computed-decorator.md#setters-for-computed-values).
 
+注意：当启用严格模式(strict)时，使用操作是必需的，请参阅[useStrict](https://github.com/mobxjs/mobx/blob/gh-pages/docs/refguide/api.md#usestrict)。
 
+有关`action`的详细介绍，请参阅[MobX 2.2 release notes](https://medium.com/p/45cdc73c7c8d/)。
 
+Two example actions from the contact-list project:
+```javascript
+ @action    createRandomContact() {
+        this.pendingRequestCount++;
+        superagent
+            .get('https://randomuser.me/api/')
+            .set('Accept', 'application/json')
+            .end(action("createRandomContact-callback", (error, results) => {
+                if (error)
+                    console.error(error);
+                else {
+                    const data = JSON.parse(results.text).results[0];
+                    const contact = new Contact(this, data.dob, data.name, data.login.username, data.picture)
+                    contact.addTag('random-user');
+                    this.contacts.push(contact);
+                    this.pendingRequestCount--;
+                }
+            }));
+    }
+```
 
+**async actions and runInAction.**
 
+action只影响当前运行的函数，而不影响当前函数调度（但未调用）的函数！ 这意味着如果你有一个`setTimeout`，promise.`then`或`async`构造，并且在该回调中一些更多的状态被改变，那些回调也应该包装在action中！ 这在上面用“createRandomContact-callback”动作来演示。
+如果你使用`async / await`，这是一个有点棘手，因为你不能只是包装异步函数体在行动。 在这种情况下，`runInAction`可以派上用场，在你打算更新状态的地方包装。 （但不要在这些块中等待调用）。
+例子：
+```javascript
+@action /*optional*/ updateDocument = async () => {
+    const data = await fetchDataFromUrl();
+    /* required in strict mode to be allowed to update state: */
+    runInAction("update state after fetching data", () => {
+        this.data.replace(data);
+        this.isSaving = true;
+    })
+}
+```
+The usage of `runInAction` is: `runInAction(name?, fn, scope?)`.
 
-
-
-
-
-
+If you use babel, this plugin could help you to handle your async actions: [mobx-deep-action](https://github.com/mobxjs/babel-plugin-mobx-deep-action).
 
