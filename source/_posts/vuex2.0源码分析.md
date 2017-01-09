@@ -8,6 +8,8 @@ categories:
   - vue
 ---
 
+> 原文：[https://github.com/DDFE/vue-blog/issues/8](https://github.com/DDFE/vue-blog/issues/8)
+
 当我们用 Vue.js 开发一个中到大型的单页应用时，经常会遇到如下问题：
 
 * 如何让多个 Vue 组件共享状态

@@ -8,6 +8,8 @@ categories:
   - vue
 ---
 
+> 原文：[https://github.com/DDFE/DDFE-blog/issues/10](https://github.com/DDFE/DDFE-blog/issues/10)
+
 # 前言
 
 作为 Vue 的使用者我们对于 vue-cli 都很熟悉，但是对它的 webpack 配置我们可能关注甚少，今天我们为大家带来 vue-cli#2.0 的 webpack 配置分析

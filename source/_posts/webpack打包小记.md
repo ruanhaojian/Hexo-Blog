@@ -33,3 +33,5 @@ require('components/lib/button/style.css')
 
 类似的lodash库也有许多模块，提供了分模块的插件 `babel-plugin-lodash`。
 
+[webpack 构建性能优化策略小结](https://segmentfault.com/a/1190000007891318)
+
