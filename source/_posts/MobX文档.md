@@ -1,7 +1,10 @@
 ---
 title: 【译】MobX文档
 date: 2017-01-05 17:45:14
-tags: mobx
+tags: 
+    - mobx
+    - react
+    - 状态管理
 ---
 
 > [mobxjs intro](http://mobxjs.github.io/mobx/intro/overview.html)  英文文档。
