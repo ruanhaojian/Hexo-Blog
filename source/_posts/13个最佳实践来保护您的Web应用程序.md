@@ -5,6 +5,8 @@ tags:
 	- web
 ---
 
+> [13 best practices to secure your web application](http://nodewebapps.com/2017/01/03/13-security-best-practices-for-your-web-application/)
+
 每个人都同意Web应用程序的安全性非常重要，但很少认真对待。 以下是在部署下一个Web应用程序之前应该遵循的13步安全检查清单。
 
 <!--more-->
