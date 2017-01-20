@@ -10,6 +10,9 @@ categories:
 
 <!--more-->
 
+最近看到一个[awesome-webpack-cn](https://github.com/webpack-china/awesome-webpack-cn) 有很全的中文资料。
+[webpack 中文文档](https://doc.webpack-china.org/)
+
 # 一、使用ES6模块import，打包出来项目体积偏大
 
 假如我们使用ES6模块引用，以我使用mint-ui为例：
