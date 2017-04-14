@@ -1,5 +1,5 @@
 ---
-title: 豆瓣Rexxar使用介绍
+title: 豆瓣Rexxar使用记录
 date: 2016-12-22 16:58:53
 tags: 
 	- rexxar
