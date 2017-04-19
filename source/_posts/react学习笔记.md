@@ -343,7 +343,7 @@ createElement 函数是 JSX 编译之后使用的创建 React Element 的函数�
 5. reducer和selector请放到一个文件，请记住reducer之间可以compose.
 6. 请善用higher order component. 如果某一项功能是多个组建通用，higher order component往往要比套一层container更灵活。
 7. 请慎重选择组建树的哪一层使用connected component(连接到store)，通常是比较高层的组建用来和store沟通，最低层组建使用这防止太长的prop chain.
-8. 项目大了之后请用**redux-saga**或者**redux-observables**
+8. 项目大了之后请用**[redux-saga](http://leonshi.com/redux-saga-in-chinese/index.html)**或者**[redux-observables](https://github.com/redux-observable/redux-observable)**
 9. 请慎用自定义的redux-middleware,错误的配置可能会影响到其他middleware.
 
 
@@ -355,6 +355,11 @@ createElement 函数是 JSX 编译之后使用的创建 React Element 的函数�
 * 逐层节点比较，先消除，在重新创建
 
 理解diff让我们更好的理解生命周期。
+
+
+# 资源
+
+[react-redux-universal-hot-example](https://github.com/erikras/react-redux-universal-hot-example) 一个使用全面技术的例子
 
 
 
