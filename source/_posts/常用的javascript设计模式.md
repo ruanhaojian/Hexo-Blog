@@ -6,6 +6,9 @@ tags: javascript
 
 > 转载自AlloyTeam：http://www.alloyteam.com/2012/10/common-javascript-design-patterns/
 
+收集相关：
+[Learning JavaScript Design Patterns](https://addyosmani.com/resources/essentialjsdesignpatterns/book/#constructorpatternjavascript)
+
 <!--more-->
 
 《[Practical Common Lisp](http://www.amazon.cn/gp/product/B005V9BBDK/ref=as_li_qf_sp_asin_il_tl?ie=UTF8&camp=536&creative=3200&creativeASIN=B005V9BBDK&linkCode=as2&tag=vastwork-23)》的作者 Peter Seibel 曾说，如果你需要一种模式，那一定是哪里出了问题。他所说的问题是指因为语言的天生缺陷，不得不去寻求和总结一种通用的解决方案。

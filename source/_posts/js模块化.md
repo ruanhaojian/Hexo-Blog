@@ -118,6 +118,11 @@ CommonJS模块以服务器第一原则发展，选择同步加载，它的模块
 });
 ```
 
+# CommonJS 规范
+
+Node应用由模块组成，采用CommonJS模块规范。[详情](http://javascript.ruanyifeng.com/nodejs/module.html)
+
+
 # ES6 Module (ruanyf ES6入门 Module)
 
 ES6 模块的设计思想，是尽量的静态化，使得编译时就能确定模块的依赖关系，以及输入和输出的变量。CommonJS 和 AMD 模块，都只能在运行时确定这些东西。比如，CommonJS 模块就是对象，输入时必须查找对象属性。
